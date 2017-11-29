@@ -1,6 +1,9 @@
-import sys
 import fnmatch
 import logging
+import os
+import shutil
+import sys
+import tempfile
 
 from rma.redis import RmaRedis
 from rma.scanner import Scanner
@@ -34,17 +37,45 @@ def ptransform(nm):
     return rt
 
 
-def connect_to_redis(host, port, db=0, password=None):
+def get_ssl_kwargs(ssl_cert, ssl_key, ssl_ca_cert, dirpath):
     """
+    Write SSL certs to files, and return a dictionary of keyword arguments to
+    make use of them.
+    Useful to work around the fact that `redis-py` only accepts SSL certs as
+    filenames.
+    """
+    assert(all([ssl_cert, ssl_key, ssl_ca_cert]))
 
-    :param host:
-    :param port:
-    :param db:
-    :param password:
+    kwargs = dict(ssl_certfile=ssl_cert,
+                  ssl_keyfile=ssl_key,
+                  ssl_ca_certs=ssl_ca_cert)
+
+    for k, v in kwargs.items():
+        path = os.path.join(dirpath, k)
+        with open(path, 'w') as f:
+            f.write(v)
+
+        kwargs[k] = path
+
+    return kwargs
+
+
+def connect_to_redis(*a, **kw):
+    """
     :return RmaRedis:
     """
+    workdir = tempfile.mkdtemp()
+
+    kwargs = {
+        'url': os.environ['REDIS_URL']}
+    kwargs.update(**get_ssl_kwargs(
+        ssl_cert=os.environ['REDIS_SSL_CERT'],
+        ssl_key=os.environ['REDIS_SSL_KEY'],
+        ssl_ca_cert=os.environ['REDIS_SSL_CA_CERT'],
+        dirpath=workdir))
+
     try:
-        redis = RmaRedis(host=host, port=port, db=db, password=password)
+        redis = RmaRedis.from_url(**kwargs)
         if not check_redis_version(redis):
             sys.stderr.write('This script only works with Redis Server version 2.6.x or higher\n')
             sys.exit(-1)
