@@ -23,6 +23,9 @@ def ptransform(nm):
     elif nm.startswith('qo_cli.aff_aggregations.aggregate_aff_aname_aname'):
         spl = nm.split('-')
         rt = '-'.join(spl[0:1])+':'+'-'.join(spl[1:])
+    elif nm.startswith('flask_cache_'):
+        spl = nm.split('_')
+        rt = '_'.join(spl[0:2])+'_:'+'_'.join(spl[2:])
     elif nm.endswith('_trigger_queue_user_job'):
         spl = nm.split('_')
         rt = '_'.join(spl[1:])+':'+'_'.join(spl[0:1])
