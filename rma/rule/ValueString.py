@@ -91,7 +91,7 @@ class ValueString(object):
                     # This code works in real time so key me be deleted and this code fail
                     error_string = repr(e)
                     self.logger.warning(error_string)
-                    if 'DEBUG' in error_string:
+                    if 'DEBUG' in error_string or 'unknown command' in error_string:
                         use_debug_command = False
 
             used_bytes = used_bytes if len(used_bytes) != 0 else [0]
