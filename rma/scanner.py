@@ -75,7 +75,7 @@ class Scanner(object):
         for key in ret:
             pipe.type(key)
             pipe.object('ENCODING', key)
-        key_with_types = [{'type': x, 'encoding': y} for x, y in chunker(pipe.execute(), 2)]
+        key_with_types = [(x, y) for x, y in chunker(pipe.execute(), 2)]
         return key_with_types
 
     def scan(self, limit=1000):
