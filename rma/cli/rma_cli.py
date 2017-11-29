@@ -5,7 +5,7 @@ import sys
 from argparse import ArgumentParser, HelpFormatter
 from rma.application import RmaApplication
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 VALID_TYPES = ("string", "hash", "list", "set", "zset")
 VALID_MODES = ('all', 'scanner', 'ram', 'global')

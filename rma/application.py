@@ -112,6 +112,7 @@ class RmaApplication(object):
 
     def __init__(self, host="127.0.0.1", port=6367, password=None, db=0, match="*", limit=0, filters=None, logger=None, format="text"):
         self.logger = logger or logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
 
         self.splitter = SimpleSplitter()
         self.isTextFormat = format == "text"

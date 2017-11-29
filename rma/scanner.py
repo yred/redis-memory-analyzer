@@ -58,7 +58,8 @@ class Scanner(object):
                 key_with_types = msgpack.unpackb(self.resolve_types_script(ret))
             except ResponseError as e:
                 if "CROSSSLOT" not in repr(e):
-                    raise e
+                    self.logger.warning(e)
+
                 key_with_types = self.resolve_with_pipe(ret)
                 self.pipeline_mode = True
         else:
