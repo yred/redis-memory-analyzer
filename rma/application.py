@@ -69,13 +69,18 @@ def connect_to_redis(*a, **kw):
     """
     workdir = tempfile.mkdtemp()
 
+    prefix = os.getenv('REDIS_PREFIX', 'REDIS')
+    def varname(name):
+        return '{}_{}'.format(prefix, name)
+
     kwargs = {
-        'url': os.environ['REDIS_URL']}
+        'url': os.environ[varname('URL')]}
     kwargs.update(**get_ssl_kwargs(
-        ssl_cert=os.environ['REDIS_SSL_CERT'],
-        ssl_key=os.environ['REDIS_SSL_KEY'],
-        ssl_ca_cert=os.environ['REDIS_SSL_CA_CERT'],
+        ssl_cert=os.environ[varname('SSL_CERT')],
+        ssl_key=os.environ[varname('SSL_KEY')],
+        ssl_ca_cert=os.environ[varname('SSL_CA_CERT')],
         dirpath=workdir))
+    kwargs['decode_components'] = True
 
     try:
         redis = RmaRedis.from_url(**kwargs)
@@ -214,7 +219,6 @@ class RmaApplication(object):
 
     def get_pattern_aggregated_data(self, data):
         split_patterns = self.splitter.split((ptransform(obj["name"]) for obj in data))
-        self.logger.debug(split_patterns)
 
         aggregate_patterns = {item: [] for item in split_patterns}
         for pattern in split_patterns:

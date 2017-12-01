@@ -47,6 +47,15 @@ REDIS_ENCODING_STR_TO_ID_LIB = {
     b'skiplist': REDIS_ENCODING_ID_SKIPLIST,
 }
 
+# Based on: https://redis.io/commands/object
+DEFAULT_REDIS_TYPE_TO_ENCODING_STR = {
+    b'string': b'raw',
+    b'hash': b'hashtable',
+    b'list': b'linkedlist',
+    b'set': b'hashtable',
+    b'zset': b'skiplist',
+}
+
 REDIS_ENCODING_ID_TO_STR_LIB = dict((v, k) for k, v in REDIS_ENCODING_STR_TO_ID_LIB.items())
 
 

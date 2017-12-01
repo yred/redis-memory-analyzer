@@ -26,6 +26,7 @@ class Scanner(object):
         self.match = match
         self.accepted_types = accepted_types[:] if accepted_types else REDIS_TYPE_ID_ALL
         self.pipeline_mode = False
+        self.pipeline_without_object_encoding = False
         self.resolve_types_script = self.redis.register_script("""
             local ret = {}
             for i = 1, #KEYS do
@@ -74,8 +75,22 @@ class Scanner(object):
         pipe = self.redis.pipeline(transaction=False)
         for key in ret:
             pipe.type(key)
-            pipe.object('ENCODING', key)
-        key_with_types = [(x, y) for x, y in chunker(pipe.execute(), 2)]
+            if not self.pipeline_without_object_encoding:
+                pipe.object('ENCODING', key)
+
+        if self.pipeline_without_object_encoding:
+            key_with_types = [
+                (t, DEFAULT_REDIS_TYPE_TO_ENCODING_STR[t]) for t in pipe.execute()]
+        else:
+            try:
+                key_with_types = [(x, y) for x, y in chunker(pipe.execute(), 2)]
+            except ResponseError as e:
+                logging.warning(e)
+                if "command 'OBJECT' is not allowed" in str(e):
+                    self.pipeline_without_object_encoding = True
+
+                key_with_types = self.resolve_with_pipe(ret)
+
         return key_with_types
 
     def scan(self, limit=1000):
